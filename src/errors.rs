@@ -1,5 +1,6 @@
 use std::io;
 
+#[derive(Debug)]
 pub struct ErrorInfo {
     name: String,
     table_index: Option<usize>,
