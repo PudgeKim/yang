@@ -56,4 +56,8 @@ impl YangLoader {
     pub fn get_resource(&self, file_name: &str) -> Option<&[YamlData]> {
         self.resources.get(file_name).map(|e| e.as_slice())
     }
+
+    pub fn pop_resource(&mut self, file_name: &str) -> Option<Vec<YamlData>> {
+        self.resources.remove(file_name)
+    }
 }
