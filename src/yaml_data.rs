@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use serde::de::DeserializeOwned;
 use crate::errors::ErrorInfo;
 
 #[derive(Debug, serde::Deserialize)]
@@ -55,5 +56,14 @@ impl YamlData {
         }
 
         Ok(())
+    }
+}
+
+impl YamlData {
+    pub fn get_data<T: DeserializeOwned>(&self, key: &str) -> Option<T> {
+        self
+            .properties
+            .get(key)
+            .and_then(|v| serde_yaml::from_value(v.clone()).ok())
     }
 }
