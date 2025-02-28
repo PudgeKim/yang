@@ -66,4 +66,17 @@ impl YamlData {
             .get(key)
             .and_then(|v| serde_yaml::from_value(v.clone()).ok())
     }
+
+    pub fn get_data_as_vec<T: DeserializeOwned>(&self, key: &str) -> Vec<T> {
+        self
+            .properties
+            .get(key)
+            .and_then(|v| v.as_sequence())
+            .into_iter()
+            .flat_map(|seq| seq
+                .into_iter()
+                .filter_map(|v| serde_yaml::from_value::<T>(v.clone()).ok())
+            )
+            .collect()
+    }
 }
