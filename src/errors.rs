@@ -33,8 +33,3 @@ impl From<serde_yaml::Error> for LoadError {
     }
 }
 
-pub enum ValidationError {
-    TableDataError(String),
-
-}
-
