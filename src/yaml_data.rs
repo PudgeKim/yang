@@ -42,13 +42,39 @@ impl YamlData {
 
     fn validate_table_value(&self, v: &serde_yaml::Value) -> Result<(), (Option<usize>, String)> {
         match v {
-            serde_yaml::Value::Mapping(_) => {
-                return Err((None, String::from("Table value cannot be a mapping type.")));
-            }
+            /// ```yaml
+            /// Name: Test1
+            /// Npc:
+            ///   - Name: Goblin
+            ///     Type:
+            ///       Aggressive: false
+            ///     Properties:
+            ///       - Hp: 100
+            ///         Mp: 10
+            ///   - Name: KingGoblin
+            ///     Item: [Legend_Sword, Legend_Armor]
+            ///     Type:
+            ///       Aggressive: true
+            ///     Properties:
+            ///       - Hp: 1000
+            ///         Mp: 300
+            /// ```
+            /// In the above data, Type and Properties cannot be allowed because it exceeds 2 depth.
             serde_yaml::Value::Sequence(seq) => {
-                for (table_index, v) in seq.into_iter().enumerate() {
-                    if v.is_mapping() {
-                        return Err((Some(table_index), String::from("Table value can be a sequence type but the value of sequence cannot be a mapping type.")));
+                for (table_index, seq_v) in seq.iter().enumerate() {
+                    if let Some(map) = seq_v.as_mapping() {
+                        for (_, map_v) in map {
+                            if map_v.is_mapping() {
+                                return Err((Some(table_index), String::from("Nested mapping cannot be exceed 2 depth.")))
+                            }
+                            if let Some(inner_seq) = map_v.as_sequence() {
+                                for inner_seq_v in inner_seq {
+                                    if inner_seq_v.is_mapping() {
+                                        return Err((Some(table_index), String::from("Nested mapping cannot be exceed 2 depth.")))
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
